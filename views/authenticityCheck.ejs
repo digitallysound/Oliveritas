@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authenticity Check</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/@vechain/connex@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+  <!-- <script type="module" src="../javascripts/login.js"></script>  -->
+  <link rel="icon" href="/images/main/oliveritas.svg" type="image/svg+xml">
+  <script type="module" src="../javascripts/authenticityCheck.js" defer></script>
+
+</head>
+
+<body id="page-top">
+
+  <nav class="sticky top-0 z-50 nav-bg">
+    <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+      <div class="relative flex h-16 items-center justify-between">
+        <img class="block h-8 w-auto hidden lg:block" src="../images/main/oliveritas.svg" alt="Oliveritas">
+        <a href="#page-top" id="checkConnBtn" class="text-color-a hover:bg-fuchsia-500/75 hover:text-color-c px-3 py-2 rounded-md text-sm font-medium" aria-current="page">
+          <span style="font-size: 0.75rem;">Check Connection</span>
+        </a>
+        
+        <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+          <div class="ml-3 relative">
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+<section class="page-section bg-light">
+  <div class="contract-info-section">
+    <br><br>
+    <h2 class="text-color-e text-center mb-4">Contract Information</h2>
+    <div class="info-grid">
+        <div class="info-card">
+            <h4>Name</h4>
+            <p id="nameDisplay" class="text-color-a">Loading...</p>
+        </div>
+        <div class="info-card">
+            <h4>Symbol</h4>
+            <p id="symbolDisplay" class="text-color-a">Loading...</p>
+        </div>
+        <div class="info-card">
+            <h4>Total Supply</h4>
+            <p id="totalSupplyDisplay" class="text-color-a">Loading...</p>
+        </div>
+        <div class="info-card">
+            <h4>Paused</h4>
+            <p id="pausedDisplay" class="text-color-a">Loading...</p>
+        </div>
+    </div>
+
+      <div class="text-center container">
+        <h2 class="section-heading text-uppercase text-color-e">Batch Details Check</h2>
+        <h2 id="checkAuthenticity" class="text-color-a"></h2>
+        <div class="input-group mt-3">
+          <input type="number" id="viewBatchIdQR" class="form-control" placeholder="Batch ID">
+          <input type="text" id="viewQRsecretSentence" class="form-control" placeholder="Secret Sentence">
+          <button id="checkBatchDetailsQRBnt" class="btn btn-primary">Check Batch Details</button>
+        </div>
+
+        <img src="../images/main/oliveritas.svg" alt="Oliveritas Logo" class="img-fluid" loading="lazy"/> 
+      </div>
+  </div>
+</section>
+
+<h2 id="QRinfo" class="section-heading text-uppercase text-color-e"></h2>
+  
+<section class="page-section bg-light">
+  <div class="text-center container">
+    <h2 class="section-heading text-uppercase text-color-e">Contract Management</h2>
+    
+    <!-- View Functions -->
+    <div class="mb-4">
+      <h2 id="viewBatchCoreDetails" class="text-color-a"></h2>
+      <div class="input-group mt-3">
+        <input type="number" id="viewBatchId" class="form-control" placeholder="Batch ID">
+        <button id="checkBatchCoresBtn" class="btn btn-primary">Batch Cores</button>
+        <button id="checkBatchDetailsBtn" class="btn btn-primary">Batch Details</button>
+      </div>
+
+      <h2 id="viewFunction" class="text-color-a">View Functions</h2>
+      <div class="input-group mt-3">
+        <input type="text" id="accountQuery" class="form-control" placeholder="Account Address">
+        <div class="mb-4">
+          <button id="scanQrCodeBtn" class="btn btn-primary">Scan QR Code</button>
+          <video id="qrVideo" style="display: none;"></video>
+        </div>
+        <button id="checkBalance" class="btn btn-primary">Check Balance</button>
+        <button id="checkRolesBtn" class="btn btn-primary">Check Roles</button>
+        <!-- aqui lo mismo si me interesa poner un escaner de qr -->
+      </div>
+    </div>
+</section>
+
+
+</body>
+<script src="../javascripts/scripts.js"></script> 
+</html>
