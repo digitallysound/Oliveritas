@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Oliveritas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Inter', sans-serif; } </style>
+    <link href="../stylesheets/style.css" rel="stylesheet" />
+</head>
+<body class="text-gray-800">
+
+    <div class="flex min-h-screen">
+        <%- include('partials/admin-sidebar') %> <% /* Admin Sidebar Navigation */ %>
+
+        <div class="flex-grow p-8">
+            <h1 class="text-3xl text-color-e font-bold mb-8">Admin Dashboard</h1>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-sm font-medium text-gray-500 mb-1">Total Sales (Month)</h2>
+                    <p class="text-3xl font-semibold">€<%= (typeof monthlySales !== 'undefined') ? monthlySales.toFixed(2) : '0.00' %></p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-sm font-medium text-gray-500 mb-1">New Orders (Today)</h2>
+                    <p class="text-3xl font-semibold"><%= (typeof newOrdersToday !== 'undefined') ? newOrdersToday : '0' %></p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-sm font-medium text-gray-500 mb-1">Low Stock Items</h2>
+                    <p class="text-3xl font-semibold"><%= (typeof lowStockCount !== 'undefined') ? lowStockCount : '0' %></p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-sm font-medium text-gray-500 mb-1">Active Customers</h2>
+                    <p class="text-3xl font-semibold"><%= (typeof customerCount !== 'undefined') ? customerCount : '0' %></p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold mb-4">Recent Orders</h2>
+                    <% if (typeof recentOrders !== 'undefined' && recentOrders.length > 0) { %>
+                        <ul class="divide-y divide-gray-200">
+                            <% recentOrders.forEach(order => { %>
+                                <li class="py-3 flex justify-between items-center">
+                                    <div>
+                                        <p class="text-sm font-medium">#<%= order.OrderID %> - <%= order.CustomerName %></p> <% /* Assuming CustomerName joined */ %>
+                                        <p class="text-xs text-gray-500"><%= new Date(order.OrderDate).toLocaleString() %> - €<%= (order.TotalAmount + order.DeliveryFeeAmount).toFixed(2) %></p>
+                                    </div>
+                                    <a href="/admin/orders/<%= order.OrderID %>" class="text-sm text-green-600 hover:underline">View</a>
+                                </li>
+                            <% }); %>
+                        </ul>
+                    <% } else { %>
+                        <p class="text-gray-500">No recent orders.</p>
+                    <% } %>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold mb-4">New Customers</h2>
+                     <% if (typeof recentCustomers !== 'undefined' && recentCustomers.length > 0) { %>
+                        <ul class="divide-y divide-gray-200">
+                            <% recentCustomers.forEach(cust => { %>
+                                <li class="py-3 flex justify-between items-center">
+                                    <div>
+                                        <p class="text-sm font-medium"><%= cust.EntityName %></p>
+                                        <p class="text-xs text-gray-500"><%= cust.PrimaryEmail %> - Registered: <%= new Date(cust.RegistrationDate).toLocaleDateString() %></p>
+                                    </div>
+                                    <a href="/admin/entities/<%= cust.EntityID %>/edit" class="text-sm text-green-600 hover:underline">View</a>
+                                </li>
+                            <% }); %>
+                        </ul>
+                    <% } else { %>
+                        <p class="text-gray-500">No new customers recently.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

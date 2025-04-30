@@ -1,17 +1,10 @@
 var express = require('express');
 var router = express.Router();
 
+
+// route should be /account/
 router.get('/', function(req, res, next) {
   res.render('login', { title: 'Login' });
-});
-
-router.post('/wallet-login', (req, res) => {
-  const { ethAddress } = req.body;
-  if (ethAddress) {
-    req.session.ethAddress = ethAddress;
-    return res.json({ message: 'Wallet address stored' });
-  }
-  return res.status(400).json({ error: 'No wallet address provided' });
 });
 
 module.exports = router;

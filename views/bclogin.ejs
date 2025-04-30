@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blockchain Login</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/@vechain/connex@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+  <script type="module" src="../javascripts/bclogin.js"></script>
+  <link rel="icon" href="/images/main/oliveritas.svg" type="image/svg+xml">
+</head>
+
+<body id="page-top">
+
+  <nav class="sticky top-0 z-50 nav-bg">
+    <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+      <div class="relative flex h-16 items-center justify-between">
+        <img class="block h-8 w-auto hidden lg:block" src="../images/main/oliveritas.svg" alt="Oliveritas">
+        <a href="#page-top" id="checkConnBtn"
+          class="text-color-a hover:bg-fuchsia-500/75 hover:text-color-c px-3 py-2 rounded-md text-sm font-medium"
+          aria-current="page">
+          <span style="font-size: 0.75rem;">Check Connection</span>
+        </a>
+
+        <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+          <div class="ml-3 relative">
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section class="page-section bg-light">
+    <div class="contract-info-section">
+      <br><br>
+      <h2 class="text-color-e text-center mb-4">Contract Information</h2>
+      <div class="info-grid">
+        <div class="info-card">
+          <h4>Name</h4>
+          <p id="nameDisplay" class="text-color-a">Loading...</p>
+        </div>
+        <div class="info-card">
+          <h4>Symbol</h4>
+          <p id="symbolDisplay" class="text-color-a">Loading...</p>
+        </div>
+        <div class="info-card">
+          <h4>Total Supply</h4>
+          <p id="totalSupplyDisplay" class="text-color-a">Loading...</p>
+        </div>
+        <div class="info-card">
+          <h4>Paused</h4>
+          <p id="pausedDisplay" class="text-color-a">Loading...</p>
+        </div>
+      </div>
+      <div class="text-center">
+        <img src="../images/main/oliveritas.svg" alt="Oliveritas Logo" class="img-fluid" loading="lazy" />
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section bg-light">
+    <div class="text-center container">
+      <h2 class="section-heading text-uppercase text-color-e">Contract Management</h2>
+
+      <!-- View Functions -->
+      <div class="mb-4">
+        <h2 id="viewBatchCoreDetails" class="text-color-a"></h2>
+        <div class="input-group mt-3">
+          <input type="number" id="viewBatchId" class="form-control" placeholder="Batch ID">
+          <button id="checkBatchCoresBtn" class="btn btn-primary">Batch Cores</button>
+          <button id="checkBatchDetailsBtn" class="btn btn-primary">Batch Details</button>
+        </div>
+
+        <h2 id="viewFunction" class="text-color-a">View Functions</h2>
+        <div class="input-group mt-3">
+          <input type="text" id="accountQuery" class="form-control" placeholder="Account Address">
+          <button id="checkBalance" class="btn btn-primary">Check Balance</button>
+          <button id="checkRolesBtn" class="btn btn-primary">Check Roles</button>
+        </div>
+      </div>
+
+      <!-- Admin Controls -->
+      <div id="admin" style="display: none;">
+        <div class="mb-4">
+          <h2 id="adminFunction" class="text-color-a">Admin Functions</h2>
+          <div class="btn-group admin-controls">
+            <button id="pauseBnt" class="btn btn-info">Pause</button>
+            <button id="unpauseBnt" class="btn btn-success">Unpause</button>
+            <button data-contract-write="renounceOwnership" class="btn btn-danger">Renounce Ownership</button>
+          </div>
+
+          <div class="input-group mt-3">
+            <input type="text" id="newOwner" class="form-control" placeholder="New Owner Address">
+            <button data-contract-write="transferOwnership" data-params="[document.getElementById('newOwner').value]"
+              class="btn btn-primary">Transfer Ownership</button>
+          </div>
+        </div>
+
+        <!-- Role Management -->
+        <div class="mb-4">
+          <h3>Role Management</h3>
+          <div class="input-group">
+            <input type="text" id="roleAddress" class="form-control" placeholder="Address">
+            <select id="roleType" class="form-control">
+              <option value="0">Producer</option>
+              <option value="1">Lab</option>
+              <option value="2">Mill</option>
+              <option value="3">Partner</option>
+            </select>
+            <button id="assignRoleBnt" class="btn btn-primary">Assign Role</button>
+            <button id="revokeRoleBnt" class="btn btn-danger">Revoke Role</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Batch Management -->
+      <div id="lab" style="display: none;">
+        <div class="mb-4">
+          <h3>Batch Management</h3>
+          <div class="input-group mb-3">
+            <input type="text" id="createBatchProducer" class="form-control" placeholder="Producer Address">
+            <input type="text" id="createBatchMill" class="form-control" placeholder="Mill Address">
+            <input type="number" id="createBatchQualityType" class="form-control" placeholder="Quality Category">
+            <input type="number" id="createBatchOilPercent" class="form-control" placeholder="Oil Percentage">
+            <button id="createBatchBnt" class="btn btn-primary">Create Batch</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="producer" style="display: none;">
+        <!-- Add Quantity and Hash -->
+        <div class="input-group mb-3">
+          <input type="number" id="batchNumberDetails" class="form-control" placeholder="Batch Number">
+          <input type="number" id="oliveKg" class="form-control" placeholder="Olive KG">
+          <input type="text" id="secretSentence" class="form-control" placeholder="Secret Phrase">
+          <input type="text" id="origin" class="form-control" placeholder="Origin">
+          <input type="text" id="variety" class="form-control" placeholder="Olives Variety">
+          <div id="qrcode" class="text-center"></div>
+          <button id="addBatchDetailsBnt" class="btn btn-primary">Add Details</button>
+          <button id="downloadQRBtn" class="btn btn-primary">Download QR Code</button>
+        </div>
+
+        <!-- Token Operations -->
+        <div class="mb-4">
+          <h3>Token Operations</h3>
+          <div class="input-group mb-3">
+            <input type="number" id="mintBatch" class="form-control" placeholder="Batch Number">
+            <!-- <input type="number" id="packageSizeChoice2" class="form-control" placeholder="330ml"> -->
+            <label for="packageSizeChoice">Package Size:</label>
+            <select id="packageSizeChoice" class="form-control">
+              <option value="330" selected>330ml</option>
+              <option value="500">500ml</option>
+            </select>
+            <button id="mintTokensBnt" class="btn btn-primary">Mint Tokens</button>
+          </div>
+        </div>
+
+        <div class="input-group mb-3">
+          <input type="text" id="transferTo" class="form-control" placeholder="Recipient Address">
+          <input type="number" id="transferAmount" class="form-control" placeholder="Amount">
+          <button id="transferTokensBnt" class="btn btn-primary">Transfer</button>
+        </div>
+
+        <div class="input-group mb-3">
+          <input type="number" id="burnAmount" class="form-control" placeholder="Amount">
+          <button id="burnTokensBnt" class="btn btn-danger">Burn Tokens</button>
+        </div>
+      </div>
+
+      <div id="mill" style="display: none;">
+        <!-- Approve Batch -->
+        <div class="input-group">
+          <input type="number" id="approveBatchId" class="form-control" placeholder="Batch Number">
+          <button id="approveBatchBnt" class="btn btn-primary">Approve Batch</button>
+        </div>
+      </div>
+
+      <!-- <div class="input-group mb-3">
+        <input type="text" id="approveTo" class="form-control" placeholder="Spender Address">
+        <input type="number" id="approveAmount" class="form-control" placeholder="Amount">
+        <button id="approveTokensBnt" class="btn btn-primary">Approve</button>
+      </div>
+
+      <div class="input-group mb-3">
+        <input type="text" id="transferFrom" class="form-control" placeholder="From Address">
+        <input type="text" id="transferTo" class="form-control" placeholder="To Address">
+        <input type="number" id="transferFromAmount" class="form-control" placeholder="Amount">
+        <button id="transferFromTokensBnt" class="btn btn-primary">Transfer From</button>
+      </div> -->
+
+      <div id="partner" style="display: none;">
+        <div class="input-group mb-3">
+          <input type="text" id="transferToPartner" class="form-control" placeholder="Recipient Address">
+          <input type="number" id="transferAmountPartner" class="form-control" placeholder="Amount">
+          <button id="transferTokensBntPartner" class="btn btn-primary">Transfer</button>
+        </div>
+        <div class="input-group mb-3">
+          <input type="number" id="burnAmountPartner" class="form-control" placeholder="Amount">
+          <button id="burnTokensBntPartner" class="btn btn-danger">Burn Tokens</button>
+        </div>
+      </div>
+
+      <div id="guest" style="display: none;">
+        <div class="input-group mb-3">
+          <input type="number" id="burnAmountGuest" class="form-control" placeholder="Amount">
+          <button id="burnTokensBntGuest" class="btn btn-danger">Burn Tokens</button>
+        </div>
+      </div>
+
+      <!-- Status Display -->
+      <div id="contractInfo" class="alert" style="display: none;"></div>
+    </div>
+  </section>
+
+</body>
+<script src="../javascripts/scripts.js"></script>
+
+</html>

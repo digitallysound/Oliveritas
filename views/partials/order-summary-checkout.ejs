@@ -1,0 +1,45 @@
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
+    
+    <div class="space-y-3 mb-4">
+        <% if (orderSummary.items && orderSummary.items.length > 0) { %>
+            <% orderSummary.items.forEach(item => { %>
+                <div class="flex justify-between items-center pb-2 border-b">
+                    <div>
+                        <p class="font-medium"><%= item.name %></p>
+                        <p class="text-sm text-gray-500">Qty: <%= item.quantity %></p>
+                    </div>
+                    <span class="font-medium">$<%= item.price.toFixed(2) %></span>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <p class="text-gray-500">No items in cart</p>
+        <% } %>
+    </div>
+    
+    <div class="space-y-2 border-b pb-3 mb-3">
+        <div class="flex justify-between">
+            <span>Subtotal</span>
+            <span>$<%= orderSummary.subtotal.toFixed(2) %></span>
+        </div>
+        <div class="flex justify-between">
+            <span>Shipping</span>
+            <span>$<%= orderSummary.shipping.toFixed(2) %></span>
+        </div>
+        <% if (orderSummary.discount > 0) { %>
+        <div class="flex justify-between text-green-600">
+            <span>Discount</span>
+            <span>-$<%= orderSummary.discount.toFixed(2) %></span>
+        </div>
+        <% } %>
+        <div class="flex justify-between">
+            <span>Tax</span>
+            <span>$<%= orderSummary.tax.toFixed(2) %></span>
+        </div>
+    </div>
+    
+    <div class="flex justify-between font-bold text-lg">
+        <span>Total</span>
+        <span>$<%= orderSummary.total.toFixed(2) %></span>
+    </div>
+</div>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof order !== 'undefined' ? `Order #${order.OrderID} Details` : 'Order Details' %> - Oliveritas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Inter', sans-serif; } </style>
+    <link href="../stylesheets/style.css" rel="stylesheet" />
+    <script src="../javascripts/scripts.js"></script>
+</head>
+<body class="text-gray-800">
+
+    <%- include('./partials/header') %>
+
+    <main class="container mx-auto px-4 py-8">
+         <div class="flex flex-col md:flex-row gap-8">
+            <%- include('./partials/account-nav') %>
+
+            <div class="flex-grow bg-white p-6 rounded-lg shadow-md">
+                <div class="flex justify-between items-center mb-6 border-b pb-4">
+                    <h1 class="text-2xl font-bold">Order Details</h1>
+                    <% if (typeof order !== 'undefined') { %>
+                        <span class="text-lg font-semibold">#<%= order.OrderID %></span>
+                    <% } %>
+                </div>
+
+                <% if (typeof order !== 'undefined') { %>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <h2 class="text-lg font-semibold mb-2">Order Information</h2>
+                            <p><strong>Order Date:</strong> <%= new Date(order.OrderDate).toLocaleString() %></p>
+                            <p><strong>Status:</strong>
+                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                    <%= order.Status === 'Delivered' ? 'bg-green-100 text-green-800' : order.Status === 'Shipped' ? 'bg-blue-100 text-blue-800' : order.Status === 'Cancelled' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800' %>">
+                                    <%= order.Status %>
+                                </span>
+                            </p>
+                            <% if (order.TrackingNumber && order.CarrierName) { %>
+                                <p><strong>Carrier:</strong> <%= order.CarrierName %></p>
+                                <p><strong>Tracking:</strong>
+                                    <% if (order.TrackingURL) { %> <% /* Assuming TrackingURL is constructed in backend */ %>
+                                        <a href="<%= order.TrackingURL %>" target="_blank" class="text-green-600 hover:underline"><%= order.TrackingNumber %></a>
+                                    <% } else { %>
+                                        <%= order.TrackingNumber %>
+                                    <% } %>
+                                </p>
+                            <% } %>
+                             <% if (order.ScheduledDeliveryDate) { %>
+                                <p><strong>Est. Delivery:</strong> <%= new Date(order.ScheduledDeliveryDate).toLocaleDateString() %> <%= order.ScheduledDeliveryTimeSlot || '' %></p>
+                             <% } %>
+                             <% if (order.ActualDeliveryTimestamp) { %>
+                                <p><strong>Delivered On:</strong> <%= new Date(order.ActualDeliveryTimestamp).toLocaleString() %></p>
+                             <% } %>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-semibold mb-2">Shipping Address</h2>
+                             <% if(order.ShippingAddress) { %> <% /* Assuming address is joined */ %>
+                                <p><%= order.ShippingAddress.StreetLine1 %></p>
+                                <% if(order.ShippingAddress.StreetLine2) { %><p><%= order.ShippingAddress.StreetLine2 %></p><% } %>
+                                <p><%= order.ShippingAddress.City %>, <%= order.ShippingAddress.PostalCode %></p>
+                                <p><%= order.ShippingAddress.CountyProvince %>, <%= order.ShippingAddress.CountryCode %></p>
+                             <% } else { %>
+                                <p>Address not available.</p>
+                             <% } %>
+                             <% if(order.DeliveryInstructions) { %>
+                                <p class="mt-2 text-sm text-gray-600"><em>Instructions: <%= order.DeliveryInstructions %></em></p>
+                             <% } %>
+                        </div>
+                    </div>
+
+                    <h2 class="text-lg font-semibold mb-3">Items Ordered</h2>
+                    <ul class="divide-y divide-gray-200 border-t border-b mb-6">
+                        <% if (typeof order.items !== 'undefined' && order.items.length > 0) { %>
+                            <% order.items.forEach(item => { %>
+                                <li class="py-3 flex justify-between items-center">
+                                    <div>
+                                        <a href="/products/<%= item.ProductID %>" class="font-medium hover:text-green-700"><%= item.ProductName %></a>
+                                        <p class="text-sm text-gray-500">Qty: <%= item.Quantity %> @ €<%= item.PricePerUnit.toFixed(2) %></p>
+                                    </div>
+                                    <span class="font-medium">€<%= (item.Quantity * item.PricePerUnit).toFixed(2) %></span>
+                                </li>
+                            <% }); %>
+                        <% } else { %>
+                             <li class="py-3 text-gray-500">No items found for this order.</li>
+                        <% } %>
+                    </ul>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <h2 class="text-lg font-semibold mb-2">Payment Method</h2>
+                            <% if (order.PaymentMethod) { %> <% /* Assuming payment method details joined */ %>
+                                <p><%= order.PaymentMethod.PaymentType %>
+                                <% if (order.PaymentMethod.LastFourDigits) { %>
+                                    ending in **** <%= order.PaymentMethod.LastFourDigits %>
+                                <% } %>
+                                </p>
+                                <% if (order.PaymentMethod.BillingAddress) { %>
+                                    <p class="text-sm text-gray-500 mt-1">Billed to:<br>
+                                    <%= order.PaymentMethod.BillingAddress.StreetLine1 %><br>
+                                    <%= order.PaymentMethod.BillingAddress.City %>, <%= order.PaymentMethod.BillingAddress.PostalCode %>
+                                    </p>
+                                <% } %>
+                            <% } else { %>
+                                <p>Payment details not available.</p>
+                            <% } %>
+                        </div>
+                         <div>
+                            <h2 class="text-lg font-semibold mb-2">Transaction Summary</h2>
+                             <% if (order.Transactions && order.Transactions.length > 0) { %>
+                                <% order.Transactions.forEach(txn => { %>
+                                    <p class="text-sm"><%= txn.TransactionType %>: €<%= txn.Amount.toFixed(2) %> (<%= txn.TransactionStatus %>) - <%= new Date(txn.CreatedAt).toLocaleDateString() %></p>
+                                <% }); %>
+                            <% } else { %>
+                                <p class="text-sm text-gray-500">No transaction details found.</p>
+                            <% } %>
+                        </div>
+                        <div class="text-right">
+                             <h2 class="text-lg font-semibold mb-2">Order Totals</h2>
+                            <p>Subtotal: <span class="font-medium float-right">€<%= order.TotalAmount.toFixed(2) %></span></p>
+                            <p>Delivery: <span class="font-medium float-right">€<%= order.DeliveryFeeAmount.toFixed(2) %></span></p>
+                            <p class="font-bold text-xl mt-2 border-t pt-2">Grand Total: <span class="float-right">€<%= (order.TotalAmount + order.DeliveryFeeAmount).toFixed(2) %></span></p>
+                        </div>
+                    </div>
+
+                <% } else { %>
+                    <p class="text-red-500">Order details could not be loaded.</p>
+                <% } %>
+
+            </div>
+        </div>
+    </main>
+
+    <%- include('./partials/footer') %>
+
+</body>
+</html>

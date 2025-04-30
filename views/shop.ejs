@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oliveritas - Premium Olive Oil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Inter', sans-serif; } </style>
+    <link href="../stylesheets/style.css" rel="stylesheet" />
+    <script src="../javascripts/scripts.js"></script>
+</head>
+<body class="text-gray-800">
+
+    <%- include('partials/header') %> <%- /* Include header partial */ %>
+
+    <main class="container mx-auto px-4 py-8">
+
+        <section class="text-center bg-gradient-to-r from-green-600 to-lime-500 text-white py-16 px-6 rounded-lg shadow-lg mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Discover the Taste of Excellence</h1>
+            <p class="text-lg md:text-xl mb-8">Premium Extra Virgin Olive Oils, Direct from the Grove.</p>
+            <a href="/products" class="bg-white text-green-700 font-semibold py-2 px-6 rounded-full hover:bg-gray-100 transition duration-300">Shop Now</a>
+        </section>
+
+        <section class="mb-12">
+            <h2 class="text-3xl font-semibold text-center mb-8">Featured Products</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <% if (typeof featuredProducts !== 'undefined' && featuredProducts.length > 0) { %>
+                    <% featuredProducts.forEach(product => { %>
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition duration-300">
+                            <img src="<%= product.ImageURL || 'https://placehold.co/600x400/cccccc/ffffff?text=Olive+Oil' %>" alt="<%= product.ProductName %>" class="w-full h-48 object-cover">
+                            <div class="p-6">
+                                <h3 class="text-xl font-semibold mb-2"><%= product.ProductName %></h3>
+                                <p class="text-gray-600 mb-4">€<%= product.SellingPrice.toFixed(2) %></p>
+                                <a href="/products/<%= product.ProductID %>" class="text-green-600 hover:text-green-800 font-medium">View Details &rarr;</a>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <p class="text-center text-gray-500 col-span-full">No featured products available at the moment.</p>
+                <% } %>
+            </div>
+        </section>
+
+        <section class="text-center mb-12">
+             <h2 class="text-3xl font-semibold mb-4">Why Choose Oliveritas?</h2>
+             <p class="max-w-2xl mx-auto text-gray-600">
+                 We partner directly with passionate producers to bring you the freshest, highest quality olive oils, ensuring traceability and exceptional flavour from grove to table. Based right here in Dublin, we're dedicated to quality and service.
+             </p>
+        </section>
+
+    </main>
+
+    <%- include('partials/footer') %> <%- /* Include footer partial */ %>
+
+</body>
+</html>

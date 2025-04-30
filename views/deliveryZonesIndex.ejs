@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Delivery Zones & Fees - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Inter', sans-serif; } </style>
+    <link href="../stylesheets/style.css" rel="stylesheet" />
+</head>
+<body class="text-gray-800">
+
+    <div class="flex min-h-screen">
+        <%- include('./partials/admin-sidebar', { currentPage: 'delivery' }) %>
+
+        <div class="flex-grow p-8">
+            <h1 class="text-3xl text-color-e font-bold mb-6">Manage Delivery Zones & Fees</h1>
+
+             <% if (typeof success !== 'undefined' && success) { %> <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert"><%= success %></div> <% } %>
+             <% if (typeof error !== 'undefined' && error) { %> <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert"><%= error %></div> <% } %>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1">
+                    <form id="zone-form" action="/admin/delivery-zones/add" method="POST" class="bg-white p-6 rounded-lg shadow-md space-y-4 sticky top-8">
+                         <h2 id="zone-form-title" class="text-xl font-semibold mb-3">Add New Zone</h2>
+                         <input type="hidden" name="zoneId" id="zoneId" value="">
+                         <div>
+                             <label for="zoneName" class="block text-sm font-medium text-gray-700">Zone Name *</label>
+                             <input type="text" name="zoneName" id="zoneName" required class="mt-1 block w-full p-2 border rounded-md">
+                         </div>
+                          <div>
+                             <label for="zoneDescription" class="block text-sm font-medium text-gray-700">Description</label>
+                             <textarea name="zoneDescription" id="zoneDescription" rows="2" class="mt-1 block w-full p-2 border rounded-md"></textarea>
+                         </div>
+                         <div>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" name="isActive" id="isActive" value="true" checked class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+                                <span class="text-sm font-medium text-gray-700">Is Active</span>
+                            </label>
+                         </div>
+                         <div class="flex justify-end gap-2">
+                             <button type="button" id="cancel-zone-edit-btn" onclick="resetZoneForm()" class="hidden bg-gray-300 text-gray-800 py-1 px-3 rounded-md hover:bg-gray-400 text-sm">Cancel</button>
+                             <button type="submit" class="bg-green-600 text-white py-1 px-4 rounded-md hover:bg-green-700 text-sm font-medium">Save Zone</button>
+                         </div>
+                    </form>
+                </div>
+
+                <div class="lg:col-span-2 space-y-6">
+                     <% if (typeof zones !== 'undefined' && zones.length > 0) { %>
+                        <% zones.forEach(zone => { %>
+                            <div class="bg-white rounded-lg shadow-md p-6">
+                                <div class="flex justify-between items-start mb-4 border-b pb-3">
+                                    <div>
+                                        <h2 class="text-xl font-semibold"><%= zone.ZoneName %> <span class="text-xs font-normal">(ID: <%= zone.ZoneID %>)</span></h2>
+                                        <p class="text-sm text-gray-600"><%= zone.Description || 'No description' %></p>
+                                        <span class="text-xs <%= zone.IsActive ? 'text-green-600' : 'text-red-600' %>"><%= zone.IsActive ? 'Active' : 'Inactive' %></span>
+                                    </div>
+                                    <div class="space-x-2 flex-shrink-0 ml-4">
+                                        <button onclick="editZone('<%= zone.ZoneID %>', `<%= zone.ZoneName.replace(/'/g, "\\'") %>`, `<%= (zone.Description || '').replace(/'/g, "\\'") %>`, <%= zone.IsActive %>)" class="text-xs text-blue-600 hover:underline">Edit Zone</button>
+                                        <form action="/admin/delivery-zones/<%= zone.ZoneID %>/delete" method="POST" class="inline" onsubmit="return confirm('Delete zone: <%= zone.ZoneName %>? This will delete associated rules and fees.');">
+                                            <button type="submit" class="text-xs text-red-600 hover:underline">Delete Zone</button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <h3 class="text-sm font-medium text-gray-500 mb-2">Rules (Applied by Priority)</h3>
+                                     <form action="/admin/delivery-zones/<%= zone.ZoneID %>/rules/add" method="POST" class="text-xs grid grid-cols-5 gap-1 items-end mb-2 p-2 bg-gray-50 rounded">
+                                        <input type="hidden" name="zoneId" value="<%= zone.ZoneID %>">
+                                        <div><label class="block text-xxs">Country*</label><input type="text" name="countryCode" required maxlength="2" value="IE" class="w-full p-1 border rounded text-xs"></div>
+                                        <div><label class="block text-xxs">County</label><input type="text" name="countyPattern" placeholder="County%" class="w-full p-1 border rounded text-xs"></div>
+                                        <div><label class="block text-xxs">City</label><input type="text" name="cityPattern" placeholder="City%" class="w-full p-1 border rounded text-xs"></div>
+                                        <div><label class="block text-xxs">Postal</label><input type="text" name="postalCodePattern" placeholder="D01%" class="w-full p-1 border rounded text-xs"></div>
+                                        <button type="submit" class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 text-xs">Add Rule</button>
+                                     </form>
+                                     <% if (zone.Rules && zone.Rules.length > 0) { %>
+                                        <ul class="text-xs space-y-1">
+                                        <% zone.Rules.forEach(rule => { %>
+                                            <li class="flex justify-between items-center bg-gray-50 px-2 py-1 rounded">
+                                                <span>
+                                                    <%= rule.CountryCode %> |
+                                                    County: <%= rule.CountyPattern || '*' %> |
+                                                    City: <%= rule.CityPattern || '*' %> |
+                                                    Postal: <%= rule.PostalCodePattern || '*' %>
+                                                    (Prio: <%= rule.Priority %>)
+                                                </span>
+                                                <form action="/admin/delivery-zones/<%= zone.ZoneID %>/rules/<%= rule.RuleID %>/delete" method="POST" onsubmit="return confirm('Delete this rule?');"><button type="submit" class="text-red-500 hover:text-red-700 text-xxs font-medium">&times;</button></form>
+                                            </li>
+                                        <% }); %>
+                                        </ul>
+                                    <% } else { %><p class="text-xs text-gray-400">No rules defined.</p><% } %>
+                                </div>
+
+                                 <div>
+                                    <h3 class="text-sm font-medium text-gray-500 mb-2">Fees</h3>
+                                     <form action="/admin/delivery-zones/<%= zone.ZoneID %>/fees/add" method="POST" class="text-xs grid grid-cols-4 gap-1 items-end mb-2 p-2 bg-gray-50 rounded">
+                                          <input type="hidden" name="zoneId" value="<%= zone.ZoneID %>">
+                                          <div><label class="block text-xxs">Min Order (€)</label><input type="number" name="minOrderAmount" step="0.01" placeholder="Optional" class="w-full p-1 border rounded text-xs"></div>
+                                          <div><label class="block text-xxs">Fee (€)*</label><input type="number" name="feeAmount" required step="0.01" min="0" class="w-full p-1 border rounded text-xs"></div>
+                                          <div><label class="block text-xxs">Description*</label><input type="text" name="description" required placeholder="e.g., Standard Delivery" class="w-full p-1 border rounded text-xs"></div>
+                                          <button type="submit" class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 text-xs">Add Fee</button>
+                                     </form>
+                                     <% if (zone.Fees && zone.Fees.length > 0) { %>
+                                        <ul class="text-xs space-y-1">
+                                        <% zone.Fees.forEach(fee => { %>
+                                             <li class="flex justify-between items-center bg-gray-50 px-2 py-1 rounded">
+                                                <span>
+                                                    Fee: €<%= fee.FeeAmount.toFixed(2) %>
+                                                    <% if (fee.MinOrderAmount != null) { %> (Min Order: €<%= fee.MinOrderAmount.toFixed(2) %>) <% } %>
+                                                    - <%= fee.Description %>
+                                                    <span class="<%= fee.IsActive ? 'text-green-600' : 'text-red-600' %>"><%= fee.IsActive ? '(Active)' : '(Inactive)' %></span>
+                                                </span>
+                                                 <form action="/admin/delivery-zones/<%= zone.ZoneID %>/fees/<%= fee.FeeID %>/delete" method="POST" onsubmit="return confirm('Delete this fee?');"><button type="submit" class="text-red-500 hover:text-red-700 text-xxs font-medium">&times;</button></form>
+                                            </li>
+                                        <% }); %>
+                                        </ul>
+                                    <% } else { %><p class="text-xs text-gray-400">No fees defined.</p><% } %>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p class="text-gray-500">No delivery zones created yet.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+     <script>
+        const zoneForm = document.getElementById('zone-form');
+        const zoneFormTitle = document.getElementById('zone-form-title');
+        const zoneIdInput = document.getElementById('zoneId');
+        const zoneNameInput = document.getElementById('zoneName');
+        const zoneDescriptionInput = document.getElementById('zoneDescription');
+        const isActiveInput = document.getElementById('isActive');
+        const cancelZoneBtn = document.getElementById('cancel-zone-edit-btn');
+
+        function resetZoneForm() {
+            zoneForm.action = '/admin/delivery-zones/add';
+            zoneFormTitle.textContent = 'Add New Zone';
+            zoneIdInput.value = '';
+            zoneNameInput.value = '';
+            zoneDescriptionInput.value = '';
+            isActiveInput.checked = true;
+            cancelZoneBtn.classList.add('hidden');
+        }
+
+        function editZone(id, name, description, active) {
+            zoneForm.action = `/admin/delivery-zones/${id}/edit`;
+            zoneFormTitle.textContent = 'Edit Zone';
+            zoneIdInput.value = id;
+            zoneNameInput.value = name;
+            zoneDescriptionInput.value = description;
+            isActiveInput.checked = active;
+            cancelZoneBtn.classList.remove('hidden');
+            zoneNameInput.focus();
+            window.scrollTo(0,0); // Scroll to top to see form
+        }
+    </script>
+</body>
+</html>

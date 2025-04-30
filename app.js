@@ -8,11 +8,43 @@ const csrf = require('csurf');
 var session = require('express-session');
 var helmet = require('helmet'); 
 var rateLimit = require('express-rate-limit');
+
 var indexRouter = require('./routes/index');
-var loginRouter = require('./routes/login');
+var shopRouter = require('./routes/shop');
+
+var bcloginRouter = require('./routes/bclogin');
 const authenticityCheckRouter = require('./routes/authenticityCheck');
+
+var loginRouter = require('./routes/login');
+var registerRouter = require('./routes/register');
+
+var dashboardRouter = require('./routes/dashboard');
+var productsRouter = require('./routes/products');
+var productDetailsRouter = require('./routes/product-details');
+var cartRouter = require('./routes/cart');
+var entityDirectoryRouter = require('./routes/entity-directory');
+
+var ordersRouter = require('./routes/orders');
+var orderDetailsRouter = require('./routes/order-details');
+var addressesRouter = require('./routes/addresses');
+var profileRouter = require('./routes/profile');
+var paymentMethodsRouter = require('./routes/paymentMethods'); // Assuming you have a paymentMethods route
+
+var adminDashboardRouter = require('./routes/adminDashboard');
+var adminOrdersRouter = require('./routes/adminOrders');
+var adminOrderDetailsRouter = require('./routes/adminOrderDetails');
+var adminPtsIndexRouter = require('./routes/adminPtsIndex');
+var adminPtsEditRouter = require('./routes/adminPtsEdit');
+var entitiesIndexRouter = require('./routes/entitiesIndex');
+var entitiesFormRouter = require('./routes/entitiesForm');
+var categoriesIndexRouter = require('./routes/categoriesIndex');
+var deliveryZonesIndexRouter = require('./routes/deliveryZonesIndex'); // Assuming you have a delivery zones index route
+
+var shippingRouter = require('./routes/shipping');
+var paymentRouter = require('./routes/payment');
+var reviewRouter = require('./routes/review');
+
 // var googleRouter = require('./routes/auth/google');
-// var facebookRouter = require('./routes/auth/facebook');
 
 var app = express();
 
@@ -58,10 +90,41 @@ app.use(function(req, res, next) {
 
 // Define routes
 app.use('/', indexRouter);
-app.use('/login', loginRouter);
+app.use('/shop', shopRouter);
+
+app.use('/bclogin', bcloginRouter);
 app.use('/authenticityCheck', authenticityCheckRouter);
+
+app.use('/login', loginRouter);
+app.use('/register', registerRouter);
+app.use('/products', productsRouter);
+app.use('/product-details', productDetailsRouter);
+app.use('/cart', cartRouter);
+app.use('/entity-directory', entityDirectoryRouter);
+
+app.use('/account/dashboard', dashboardRouter);
+app.use('/account/orders', ordersRouter);
+app.use('/account/order-details', orderDetailsRouter);
+app.use('/account/addresses', addressesRouter);
+app.use('/account/profile', profileRouter);
+app.use('/account/paymentMethods', paymentMethodsRouter);
+
+app.use('/admin/adminDashboard', adminDashboardRouter);
+app.use('/admin/adminOrders', adminOrdersRouter);
+app.use('/admin/orders/adminOrderDetails', adminOrderDetailsRouter);
+app.use('/admin/products/adminPtsIndex', adminPtsIndexRouter);
+app.use('/admin/products/adminPtsEdit', adminPtsEditRouter);
+app.use('/admin/entitiesIndex', entitiesIndexRouter);
+app.use('/admin/entitiesForm', entitiesFormRouter);
+app.use('/admin/categoriesIndex', categoriesIndexRouter);
+app.use('/admin/deliveryZonesIndex', deliveryZonesIndexRouter);
+
+app.use('/checkout/shipping', shippingRouter);
+app.use('/checkout/payment', paymentRouter);
+app.use('/checkout/review', reviewRouter);
+
 // app.use('/auth/google', googleRouter);
-// app.use('/auth/facebook', facebookRouter);
+
 
 // Handle 404 errors
 app.use(function (req, res, next) {
@@ -76,8 +139,8 @@ app.use(function (err, req, res, next) {
   res.render('error');
 });
 
-// Redirect to external URL for /register route
-app.get("/register", (_, res) => {
+// Redirect to external URL for blockchain register route
+app.get("/bcregister", (_, res) => {
   res.redirect(301, 'https://www.veworld.net/')
 })
 
@@ -87,6 +150,7 @@ var sqlite3 = require('sqlite3').verbose();
 require('dotenv/config');
 
 var hpp = require('hpp');
+const { profile } = require('console');
 // require('./config/passport')(passport);
 
 app.use(logger('dev'));
@@ -119,5 +183,10 @@ app.use(rateLimit({
 }));
 app.use(hpp());
 
+app.use((req, res, next) => {
+  // Assuming the user in the session is stored
+  res.locals.user = req.session.user || null;
+  next();
+});
 
 module.exports = app;

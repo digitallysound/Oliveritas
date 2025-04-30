@@ -1,0 +1,55 @@
+<% /* --- partials/footer.ejs --- */ %>
+<footer class="bg-color-b mt-12">
+    <div class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+                <h3 class="text-lg text-color-e font-semibold mb-3">About Oliveritas</h3>
+                <p class="text-color-a">A modern platform for olive oil manufacturing and distribution with blockchain technology.</p>
+            </div>
+            <div>
+                <h3 class="text-lg text-color-e font-semibold mb-3">Quick Links</h3>
+                <ul class="space-y-2">
+                    <li><a href="/" class="text-color-a hover:text-blue-600">Home</a></li>
+                    <li><a href="/market" class="text-color-a hover:text-blue-600">Market</a></li>
+                    <li><a href="/about" class="text-color-a hover:text-blue-600">About Us</a></li>
+                    <li><a href="/contact" class="text-color-a hover:text-blue-600">Contact</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-lg text-color-e font-semibold mb-3">Legal</h3>
+                <ul class="space-y-2">
+                    <li><a href="/terms" class="text-color-a hover:text-blue-600">Terms of Service</a></li>
+                    <li><a href="/privacy" class="text-color-a hover:text-blue-600">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-lg text-color-e font-semibold mb-3">Connect With Us</h3>
+                <div class="w-full flex flex-row justify items-center gap-6 sm:gap-8 mt-3 mb-0">
+                    <a href="https://www.youtube.com/@OliveritasOEVOO" aria-label="Follow us on YouTube" target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-block transform hover:scale-110 transition-transform duration-200">
+                      <img src="../socialMedia/youtube.svg" alt="YouTube" loading="lazy" width="40" height="40" />
+                    </a>
+                    <a href="https://www.instagram.com/oliveritas.oevoo/" aria-label="Follow us on Instagram" target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-block transform hover:scale-110 transition-transform duration-200">
+                      <img src="../socialMedia/instagram.svg" alt="Instagram" loading="lazy" width="40" height="40" />
+                    </a>
+                    <a href="https://www.tiktok.com/@oliveritas.oevoo" aria-label="Follow us on TikTok" target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-block transform hover:scale-110 transition-transform duration-200">
+                      <img src="../socialMedia/tiktok.svg" alt="TikTok" loading="lazy" width="35" height="35" />
+                    </a>
+                    <a href="https://x.com/oevooOliveritas" aria-label="Follow us on X (Twitter)" target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-block transform hover:scale-110 transition-transform duration-200">
+                      <img src="../socialMedia/x.svg" alt="X (Twitter)" loading="lazy" width="35" height="35" />
+                    </a>
+                  </div>
+            </div>
+        </div>
+        <div class="border-t border-gray-200 mt-8 pt-6 text-center">
+            <p class="text-color-a text-sm">&copy; <%= new Date().getFullYear() %> Oliveritas. All rights reserved.</p>
+        </div>
+    </div>
+</footer>

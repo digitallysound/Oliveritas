@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Payment - Oliveritas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Inter', sans-serif; } </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+    <!-- Set default values using different variable names to avoid the initialization error -->
+    <% 
+    const defaultPaymentMethodId = 'new'; 
+    const defaultBillingAddressId = '';
+    
+    // Now safely check and assign to new variables
+    const paymentMethodId = typeof selectedPaymentMethodId !== 'undefined' ? selectedPaymentMethodId : defaultPaymentMethodId;
+    const billingAddressId = typeof selectedBillingAddressId !== 'undefined' ? selectedBillingAddressId : defaultBillingAddressId;
+    
+    // Create a default orderSummary object with a different name first
+    const defaultOrderSummary = {
+        items: [],
+        subtotal: 0,
+        shipping: 0,
+        tax: 0,
+        discount: 0,
+        total: 0
+    };
+    
+    // Then assign to orderSummary
+    const orderSummaryData = typeof orderSummary !== 'undefined' ? orderSummary : defaultOrderSummary;
+    %>
+
+    <%- include('./partials/header-minimal') %>
+
+    <main class="container mx-auto px-4 py-12 max-w-3xl">
+        <h1 class="text-2xl font-bold text-center mb-8">Checkout - Step 2: Payment</h1>
+        <%- include('./partials/checkout-progress', { step: 2 }) %>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="md:col-span-2 bg-white p-6 rounded-lg shadow-md">
+                 <form id="payment-form" action="/checkout/payment" method="POST">
+                     <h2 class="text-xl font-semibold mb-4">Select Payment Method</h2>
+
+                     <% if (typeof paymentMethods !== 'undefined' && paymentMethods.length > 0) { %>
+                        <div class="space-y-3 mb-6">
+                            <% paymentMethods.forEach(pm => { %>
+                                <label class="block border rounded-lg p-4 cursor-pointer hover:border-green-500 has-[:checked]:bg-green-50 has-[:checked]:border-green-600">
+                                    <input type="radio" name="paymentMethodId" value="<%= pm.PaymentMethodID %>" class="sr-only" required <%= (paymentMethodId == pm.PaymentMethodID) ? 'checked' : '' %>>
+                                    <div class="flex items-center">
+                                        <% /* Add icons for card types if available */ %>
+                                        <span class="font-medium mr-4"><%= pm.PaymentType %></span>
+                                        <% if (pm.LastFourDigits) { %>
+                                            <span>**** **** **** <%= pm.LastFourDigits %></span>
+                                            <span class="ml-auto text-sm text-gray-500">Exp: <%= pm.ExpiryMonth %>/<%= pm.ExpiryYear %></span>
+                                        <% } else { %>
+                                             <span>Account: <%= pm.PaymentToken.substring(0, 15) %>...</span> <% /* Placeholder for PayPal etc */ %>
+                                        <% } %>
+                                    </div>
+                                </label>
+                            <% }); %>
+                        </div>
+                    <% } %>
+
+                     <label class="block border rounded-lg p-4 cursor-pointer hover:border-green-500 has-[:checked]:bg-green-50 has-[:checked]:border-green-600 mb-6">
+                         <input type="radio" name="paymentMethodId" value="new" class="sr-only" required <%= (paymentMethodId == 'new' || !paymentMethodId) ? 'checked' : '' %>>
+                         <span class="font-medium">Add New Credit/Debit Card</span>
+                     </label>
+
+                    <div id="card-element" class="p-3 border rounded-md bg-gray-50 mb-4">
+                        <p class="text-sm text-gray-500 text-center py-4">Secure card form will load here.</p>
+                    </div>
+                     <div id="card-errors" role="alert" class="text-red-600 text-sm mb-4"></div>
+
+                     <div class="mt-6 border-t pt-4">
+                         <h3 class="text-lg font-semibold mb-3">Billing Address</h3>
+                         <p class="text-sm text-gray-600 mb-3">Select the billing address associated with your payment method.</p>
+                         <% if (typeof addresses !== 'undefined' && addresses.length > 0) { %>
+                            <select name="billingAddressId" id="billingAddressId" required class="w-full p-2 border rounded-md bg-white">
+                                <option value="">-- Select Billing Address --</option>
+                                <% addresses.forEach(addr => { %>
+                                    <option value="<%= addr.AddressID %>" <%= (billingAddressId == addr.AddressID) ? 'selected' : '' %>>
+                                        <%= addr.StreetLine1 %>, <%= addr.City %>, <%= addr.PostalCode %>
+                                    </option>
+                                <% }); %>
+                                 <option value="new">-- Add New Billing Address --</option>
+                            </select>
+                            <% } else { %>
+                            <p class="text-red-500">Please add an address in your account first.</p>
+                         <% } %>
+                     </div>
+
+                     <input type="hidden" name="paymentMethodToken" id="paymentMethodToken">
+
+                     <button id="submit-button" type="submit" class="mt-8 w-full bg-green-600 text-white py-3 px-6 rounded-md hover:bg-green-700 font-semibold disabled:opacity-50">
+                         Continue to Review &rarr;
+                     </button>
+                 </form>
+            </div>
+
+            <div class="md:col-span-1">
+                 <%- include('./partials/order-summary-checkout', { orderSummary: orderSummaryData }) %>
+            </div>
+        </div>
+    </main>
+
+    <%- include('./partials/footer-minimal') %>
+
+    <script>
+        // --- VERY IMPORTANT ---
+        // This is where your Payment Gateway JavaScript integration goes.
+        // It will:
+        // 1. Initialize the gateway library (e.g., Stripe, Braintree).
+        // 2. Mount the card element form into the #card-element div.
+        // 3. Add event listeners to the form.
+        // 4. On form submission:
+        //    - Prevent the default form submission.
+        //    - Call the gateway's API to create a payment method token/ID (e.g., stripe.createPaymentMethod).
+        //    - Handle any errors returned by the gateway and display them in #card-errors.
+        //    - If successful, set the hidden input #paymentMethodToken with the gateway token.
+        //    - *Then* programmatically submit the form to your backend (`document.getElementById('payment-form').submit();`).
+
+        // Example placeholder:
+        const form = document.getElementById('payment-form');
+        const submitButton = document.getElementById('submit-button');
+        const cardElementContainer = document.getElementById('card-element');
+        const cardErrors = document.getElementById('card-errors');
+        const paymentMethodTokenInput = document.getElementById('paymentMethodToken');
+        const paymentMethodRadios = document.querySelectorAll('input[name="paymentMethodId"]');
+
+        // Toggle card element visibility based on selection
+        function toggleCardElement() {
+            const selectedValue = document.querySelector('input[name="paymentMethodId"]:checked')?.value;
+            if (selectedValue === 'new') {
+                cardElementContainer.style.display = 'block';
+                // Initialize gateway element here if not already done
+            } else {
+                cardElementContainer.style.display = 'none';
+                cardErrors.textContent = ''; // Clear errors
+            }
+        }
+        paymentMethodRadios.forEach(radio => radio.addEventListener('change', toggleCardElement));
+        toggleCardElement(); // Initial check
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent direct submission
+
+            const selectedPaymentMethod = document.querySelector('input[name="paymentMethodId"]:checked')?.value;
+
+            if (selectedPaymentMethod === 'new') {
+                // --- Gateway JS Logic ---
+                console.log('Processing new card via Payment Gateway...');
+                submitButton.disabled = true;
+                cardErrors.textContent = ''; // Clear previous errors
+
+                // Replace with actual gateway API call (e.g., Stripe, Braintree)
+                // Example: const { paymentMethod, error } = await stripe.createPaymentMethod(...)
+                const fakeGatewayToken = 'pm_fake_' + Date.now(); // FAKE TOKEN
+                const error = null; // FAKE ERROR
+
+                if (error) {
+                    cardErrors.textContent = error.message;
+                    submitButton.disabled = false;
+                } else {
+                    console.log('Gateway token received:', fakeGatewayToken);
+                    paymentMethodTokenInput.value = fakeGatewayToken; // Set the token
+                    form.submit(); // Submit the form to your backend
+                }
+                // --- End Gateway JS Logic ---
+            } else {
+                // Using an existing payment method, no token needed from frontend
+                console.log('Using existing payment method:', selectedPaymentMethod);
+                paymentMethodTokenInput.value = ''; // Clear any previous token
+                form.submit(); // Submit the form directly
+            }
+        });
+    </script>
+
+</body>
+</html>
