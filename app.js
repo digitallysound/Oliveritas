@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const createError = require('http-errors');
+const cors = require('cors'); // Import the cors middleware
 
 const passport = require('passport');
 const csrf = require('csurf'); 
@@ -30,7 +31,14 @@ var addressesRouter = require('./routes/addresses');
 var profileRouter = require('./routes/profile');
 var paymentMethodsRouter = require('./routes/paymentMethods'); // Assuming you have a paymentMethods route
 
+// PayPal Logick
+
+//var PayPalBackend = require('./routes/paypalbackend'); // Import your backend logic
+
 var adminDashboardRouter = require('./routes/adminDashboard');
+var paypalOrderDetail = require('./routes/paypalorderdetails');
+var getAccessToken = require('./routes/getaccesstoken');
+var subscriptionOrderDetail = require('./routes/subscriptionOrderDetails');
 var adminOrdersRouter = require('./routes/adminOrders');
 var adminOrderDetailsRouter = require('./routes/adminOrderDetails');
 var adminPtsIndexRouter = require('./routes/adminPtsIndex');
@@ -50,6 +58,9 @@ var app = express();
 
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Enable CORS for all routes
+app.use(cors());
 
 // Disable caching for all responses REVIEW
 app.use((req, res, next) => {
@@ -80,14 +91,14 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Use CSRF protection middleware
-app.use(csrf());
+/*app.use(csrf());
 
 // Make CSRF token available in views
 app.use(function(req, res, next) {
   res.locals.csrfToken = req.csrfToken();
   next();
 });
-
+*/
 // Define routes
 app.use('/', indexRouter);
 app.use('/shop', shopRouter);
@@ -108,8 +119,14 @@ app.use('/account/order-details', orderDetailsRouter);
 app.use('/account/addresses', addressesRouter);
 app.use('/account/profile', profileRouter);
 app.use('/account/paymentMethods', paymentMethodsRouter);
-
 app.use('/admin/adminDashboard', adminDashboardRouter);
+app.use('/account-order-details', paypalOrderDetail);
+app.use('/get-access-token', getAccessToken);
+app.use('/subscription-order-details', subscriptionOrderDetail);
+
+
+//PayPal
+//app.use('/api/paypal/create-payment', PayPalBackend);
 app.use('/admin/adminOrders', adminOrdersRouter);
 app.use('/admin/orders/adminOrderDetails', adminOrderDetailsRouter);
 app.use('/admin/products/adminPtsIndex', adminPtsIndexRouter);

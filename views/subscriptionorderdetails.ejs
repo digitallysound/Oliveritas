@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account subscription Details - Oliveritas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Inter', sans-serif; }</style>
+    <link href="../stylesheets/style.css" rel="stylesheet"/>
+    <script src="../javascripts/scripts.js"></script>
+</head>
+<body class="text-gray-800">
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        async function fetchSubscriptionDetails(subscriptionID) {
+            try {
+                const response = await fetch(`/checkout/payment/subscription-details/${subscriptionID}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const subscriptionDetails = await response.json();
+                displaySubscriptionDetails(subscriptionDetails); // Corrected function name
+            } catch (error) {
+                console.error('Error fetching subscription details:', error);
+                document.getElementById('subscriptionDetails').innerHTML = `<p class="text-red-500">Failed to load subscription details: ${error.message}</p>`;
+            }
+        }
+
+        function displaySubscriptionDetails(subscriptionDetails) { // Corrected function name
+            const container = document.getElementById('subscriptionDetails');
+            container.innerHTML = `<pre class="bg-gray-100 p-4 rounded overflow-auto"><code class="text-sm">${JSON.stringify(subscriptionDetails, null, 2)}</code></pre>`;
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const subscriptionID = urlParams.get('subscriptionID');
+        if (subscriptionID) {
+            fetchSubscriptionDetails(subscriptionID); // Corrected function name
+        } else {
+            document.getElementById('subscriptionDetails').innerHTML = `<p class="text-yellow-500">No subscription ID provided.</p>`;
+        }
+    });
+</script>
+
+
+    <%- include('./partials/header') %>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="flex flex-col md:flex-row gap-8">
+            <%- include('./partials/account-nav') %>
+    
+            <div class="flex-grow bg-white p-6 rounded-lg shadow-md">
+                <h1 class="text-2xl font-bold mb-6">subscription Details</h1>
+                <div id="subscriptionDetails">
+                    <!-- subscription details will be displayed here -->
+                    <p>Loading subscription details...</p>
+                </div>
+            </div>
+        </div>  
+    </main>
+    
+
+  <%- include('./partials/footer') %>
+
+</body>
+</html>

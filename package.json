@@ -3,15 +3,19 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "dev": "nodemon ./bin/www",
+    "debug": "nodemon --inspect ./bin/www"
   },
   "dependencies": {
+    "@paypal/checkout-server-sdk": "^1.0.3",
     "@vechain/connex": "^2.1.0",
     "@vechain/sdk-core": "^1.0.0-rc.6",
     "@vechain/sdk-network": "^1.0.0-rc.6",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.0",
     "cookie-parser": "~1.4.4",
+    "cors": "^2.8.5",
     "csurf": "^1.11.0",
     "debug": "~2.6.9",
     "dotenv": "^16.0.1",
@@ -36,5 +40,8 @@
     "qrcode": "^1.5.4",
     "sqlite3": "^5.1.7",
     "web3": "^1.7.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }

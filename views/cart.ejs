@@ -13,7 +13,22 @@
 <body class="text-gray-800">
 
     <%- include('./partials/header') %>
-
+    <% if (cartItems.length > 0) { %>
+      <ul>
+        <% cartItems.forEach(item => { %>
+          <li>
+            <%= item.name %> - Quantity: <%= item.quantity %> - Price: <%= item.price %>
+            <form action="/cart/remove/<%= item.id %>" method="POST">
+              <button type="submit">Remove</button>
+            </form>
+          </li>
+        <% }); %>
+      </ul>
+      <p>Total: €<%= cartTotal.toFixed(2) %></p>
+    <% } else { %>
+      <p>Your cart is empty.</p>
+    <% } %>
+    
     <main class="container mx-auto px-4 py-12">
         <h1 class="text-3xl font-bold text-center mb-8">Your Shopping Cart</h1>
 
