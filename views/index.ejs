@@ -13,6 +13,7 @@
   <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
   <!-- <script src="https://unpkg.com/htmx.org@1.6.1"></script> -->
   <script src="../javascripts/scripts.js"></script>
+  <script src="../javascripts/paypal.js"></script>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
 
@@ -59,7 +60,8 @@
                 <a href="#testimonials"
                   class="text-color-a hover:bg-fuchsia-500/75 hover:text-color-c px-3 py-2 rounded-md text-sm font-medium">COMMUNITY</a>
                 <a href="#contact"
-                  class="text-color-a hover:bg-fuchsia-500/75 hover:text-color-c px-3 py-2 rounded-md text-sm font-medium">CONTACT US</a>
+                  class="text-color-a hover:bg-fuchsia-500/75 hover:text-color-c px-3 py-2 rounded-md text-sm font-medium">CONTACT
+                  US</a>
               </div>
             </div>
           </div>
@@ -80,7 +82,8 @@
                 class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-color-B ring-1 ring-black ring-opacity-5 focus:outline-none"
                 role="menu" aria-orientation="vertical" aria-labelledby="user-menu-toggle" tabindex="-1">
                 <a href="/login" class="block px-4 py-2 text-sm text-color-a" role="menuitem" tabindex="-1">Login</a>
-                <a href="/register" class="block px-4 py-2 text-sm text-color-a" role="menuitem" tabindex="-1">Register</a>
+                <a href="/register" class="block px-4 py-2 text-sm text-color-a" role="menuitem"
+                  tabindex="-1">Register</a>
                 <!-- <a href="/bclogin" class="block px-4 py-2 text-sm text-color-a" role="menuitem" tabindex="-1">Blockchain Login</a>
                 <a href="https://www.veworld.net/" target="_blank" class="block px-4 py-2 text-sm text-color-a"
                   role="menuitem" tabindex="-1">Blockchain Register</a> -->
@@ -98,11 +101,13 @@
           <a href="#project"
             class="text-color-a hover:bg-gray-700 hover:text-color-c block px-3 py-2 rounded-md text-base font-medium">Project</a>
           <a href="#about"
-            class="text-color-a hover:bg-gray-700 hover:text-color-c block px-3 py-2 rounded-md text-base font-medium">Follow us</a>
+            class="text-color-a hover:bg-gray-700 hover:text-color-c block px-3 py-2 rounded-md text-base font-medium">Follow
+            us</a>
           <a href="#testimonials"
             class="text-color-a hover:bg-gray-700 hover:text-color-c block px-3 py-2 rounded-md text-base font-medium">Community</a>
           <a href="#contact"
-            class="text-color-a hover:bg-gray-700 hover:text-color-c block px-3 py-2 rounded-md text-base font-medium">Contact us</a>
+            class="text-color-a hover:bg-gray-700 hover:text-color-c block px-3 py-2 rounded-md text-base font-medium">Contact
+            us</a>
         </div>
       </div>
     </nav>
@@ -155,7 +160,85 @@
             </model-viewer>
           </div>
           <div class="text-center">
-            <a class="btn btn-primary btn-xl text-uppercase" href="">Pre-order</a>
+            <!--   <button class="btn btn-primary btn-xl text-uppercase" onclick="initiatePayPal()">Pre-order with PayPal</button>-->
+            <!-- Add this where you want the PayPal button to appear -->
+            <div id="paypal-button-container"></div>
+           
+
+            <script
+              src="https://www.paypal.com/sdk/js?client-id=ATpocRQjzDess3TpwxynXBL14_pSfhW2ifK2TwaC9Tx8W9Z6wZa-3Iskr5XjVH62yGqln2s4edSrgtSx&enable-funding=paylater,credit,card&currency=EUR&vault=false"  data-namespace="PayPalNow"
+              ></script>
+            <script>
+              
+              PayPalNow.Buttons({
+                createOrder: function (data, actions) {
+                  return fetch('/checkout/payment/create-payment', { // Your server endpoint to create the order
+                    method: 'post',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ amount: '40.00' }) // Pass necessary order details here
+                  }).then(function (res) {
+                    return res.json();
+                  }).then(function (orderData) {
+                    return orderData.orderID; // Use the order ID returned from your server
+                  });
+                },
+                onApprove: function (data, actions) {
+                  return fetch('/checkout/payment/capture-payment', { // Your server endpoint to capture the order
+                    method: 'post',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ orderID: data.orderID })
+                  })
+                    .then(function (res) {
+                      return res.json();
+                    })
+                    .then(function (result) {
+                      if (result.success) {
+                        // Store shipping address and line items in localStorage
+                        localStorage.setItem('shippingAddress', JSON.stringify(result.shippingAddress));
+                        localStorage.setItem('lineItems', JSON.stringify(result.lineItems));
+
+                        alert('Transaction completed successfully! Thank you for your order.');
+                        window.location.href = `/account-order-details?orderID=${result.orderID}`; // Pass orderID as query parameter
+                      } else {
+                        alert('Transaction failed. Please try again.'); // Handle failure case
+                      }
+                    });
+                }
+              }).render('#paypal-button-container');
+            </script>
+ <div id="paypal-subscription-button-container"></div>
+            <script
+              src="https://www.paypal.com/sdk/js?client-id=ATpocRQjzDess3TpwxynXBL14_pSfhW2ifK2TwaC9Tx8W9Z6wZa-3Iskr5XjVH62yGqln2s4edSrgtSx&disable-funding=credit,paylater,card&currency=EUR&vault=true&intent=subscription"
+             
+              data-namespace="PayPalSubscription"></script>
+            <script>
+              PayPalSubscription.Buttons({
+                style: {
+                  shape: 'rect',
+                  color: 'gold',
+                  layout: 'vertical',
+                  label: 'subscribe'
+                },
+                createSubscription: function (data, actions) {
+                  return actions.subscription.create({
+                    /* Creates the subscription */
+                    plan_id: 'P-41N98543WK442061FNAJZ5XA'
+                  });
+                },
+                onApprove: function (data, actions) {
+                  alert(data.subscriptionID); // You can add optional success message for the subscriber here
+                  window.location.href = `/subscription-order-details?subscriptionID=${data.subscriptionID}`;
+                }
+              }).render('#paypal-subscription-button-container'); // Renders the PayPal subscription button
+            </script>
+
+
+
+
             <br><br>
             <h3 class="section-subheading text-muted text-center">We really hope you enjoy it. For us, this is not a
               commodity, this is a piece of our land and all the sun it has received during the year. We hope you feel
@@ -251,26 +334,25 @@
       <section class="page-section bg-light" id="testimonials">
         <!-- <div class="container">
           <div class="text-center"> -->
-            <h2 class="section-heading text-uppercase text-color-e">Community</h2>
-            <!-- <div class="py-5"> -->
-              <!-- <div class="container"> -->
-                <div class="row align-items-center">
-                  <% const testimonials=["0", "1" , "2" , "3" ]; const descriptions=[ "Testimonial 0."
-                    , "Testimonial 1." , "Testimonial 2." , "Testimonial 3." ]; for (let i=0; i < testimonials.length;
-                    i++) { %>
-                    <div class="col-md-3 col-sm-6 my-3">
-                      <a href="#!"><img class="img-fluid img-brand d-block mx-auto"
-                          src="../images/testimonials/<%= testimonials[i] %>.svg" alt="..."
-                          aria-label="<%= testimonials[i] %> Logo" /></a>
-                      <p class="text-center text-color-e">
-                        <%= descriptions[i] %>
-                      </p>
-                    </div>
-                    <% } %>
-                </div>
-              <!-- </div> -->
-            <!-- </div> -->
-          <!-- </div>
+        <h2 class="section-heading text-uppercase text-color-e">Community</h2>
+        <!-- <div class="py-5"> -->
+        <!-- <div class="container"> -->
+        <div class="row align-items-center">
+          <% const testimonials=["0", "1" , "2" , "3" ]; const descriptions=[ "Testimonial 0." , "Testimonial 1."
+            , "Testimonial 2." , "Testimonial 3." ]; for (let i=0; i < testimonials.length; i++) { %>
+            <div class="col-md-3 col-sm-6 my-3">
+              <a href="#!"><img class="img-fluid img-brand d-block mx-auto"
+                  src="../images/testimonials/<%= testimonials[i] %>.svg" alt="..."
+                  aria-label="<%= testimonials[i] %> Logo" /></a>
+              <p class="text-center text-color-e">
+                <%= descriptions[i] %>
+              </p>
+            </div>
+            <% } %>
+        </div>
+        <!-- </div> -->
+        <!-- </div> -->
+        <!-- </div>
         </div> -->
       </section>
 
@@ -329,4 +411,5 @@
     </main> <!-- END MAIN  -->
   </div> <!-- END CONTAINER  -->
 </body>
+
 </html>

@@ -12,7 +12,7 @@
     <script>
         async function fetchOrderDetails(orderID) {
             try {
-                const response = await fetch(`/checkout/order-details/${orderID}`);
+                const response = await fetch(`/checkout/payment/order-details/${orderID}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }

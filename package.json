@@ -8,6 +8,7 @@
     "debug": "nodemon --inspect ./bin/www"
   },
   "dependencies": {
+    "@paypal/checkout-server-sdk": "^1.0.3",
     "@vechain/connex": "^2.1.0",
     "@vechain/sdk-core": "^1.0.0-rc.6",
     "@vechain/sdk-network": "^1.0.0-rc.6",
@@ -41,5 +42,8 @@
     "qrcode": "^1.5.4",
     "sqlite3": "^5.1.7",
     "web3": "^1.7.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
