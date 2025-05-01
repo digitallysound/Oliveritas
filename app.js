@@ -48,15 +48,18 @@ var reviewRouter = require('./routes/review');
 // var googleRouter = require('./routes/auth/google');
 
 var app = express();
+// const cors = require('cors');
+// const corsOptions = {
+//   origin: ['http://localhost:3000', 'http://localhost:3000/register', 'http://localhost:3000y/account/dashboard'], // Replace with your allowed domains
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+//   credentials: true,
+//   maxAge: 86400,
+// };
+// app.use(cors(corsOptions));
+
 const cors = require('cors');
-const corsOptions = {
-  origin: ['http://localhost:3000', 'http://localhost:3000/register', 'http://localhost:3000y/account/dashboard'], // Replace with your allowed domains
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-  credentials: true,
-  maxAge: 86400,
-};
-app.use(cors(corsOptions));
+app.use(cors());
 
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -193,47 +196,47 @@ module.exports = app;
 //   });
 // });
 
-app.post('/account/dashboard', (req, res) => {
-    const { firstName, lastName, email, phone, password, passwordConfirm } = req.body;
-    const sql = 'INSERT INTO entities (firstName, lastName, email, phone, password, passwordConfirm) VALUES (?, ?, ?, ?, ?, ?)';
-    const parameters = [firstName, lastName, email, phone, password, passwordConfirm];
+// app.post('/account/dashboard', (req, res) => {
+//     const { firstName, lastName, email, phone, password, passwordConfirm } = req.body;
+//     const sql = 'INSERT INTO entities (firstName, lastName, email, phone, password, passwordConfirm) VALUES (?, ?, ?, ?, ?, ?)';
+//     const parameters = [firstName, lastName, email, phone, password, passwordConfirm];
 
-    db.query(sql, parameters, (err) => {
-        // Record the query execution
-        recordDatabaseQuery({
-            sql: sql,
-            parameters: parameters,
-            status: err ? 'error' : 'success'
-        });
+//     db.query(sql, parameters, (err) => {
+//         // Record the query execution
+//         recordDatabaseQuery({
+//             sql: sql,
+//             parameters: parameters,
+//             status: err ? 'error' : 'success'
+//         });
 
-        if (err) return res.status(500).json({ message: 'Database error' });
-        res.status(200).json({ message: 'Thank you for contacting us!' });
-    });
-});
+//         if (err) return res.status(500).json({ message: 'Database error' });
+//         res.status(200).json({ message: 'Thank you for contacting us!' });
+//     });
+// });
 
 
-app.get('/login', function (_req, res) {
-  console.log('Executing query:');
-  // On request of this page initiating SQL query. Assumes that the object initialization is done above.
-  const selectQuery = 'SELECT * FROM Entities WHERE FirstName = "A"';
-  console.log('Executing query:', selectQuery);
+// app.get('/login', function (_req, res) {
+//   console.log('Executing query:');
+//   // On request of this page initiating SQL query. Assumes that the object initialization is done above.
+//   const selectQuery = 'SELECT * FROM Entities WHERE FirstName = "A"';
+//   console.log('Executing query:', selectQuery);
 
-  db.query(selectQuery, function select(error, results, _fields) {
-    if (error) {
-      console.error('Database error:', error);
-      return res.status(500).send('Database error');
-    }
+//   db.query(selectQuery, function select(error, results, _fields) {
+//     if (error) {
+//       console.error('Database error:', error);
+//       return res.status(500).send('Database error');
+//     }
 
-    if (results.length === 0) {
-      console.log('No data found for the query.');
-      // Render the template with empty data alert
-      return res.render('/account/dashboard');
-    }
+//     if (results.length === 0) {
+//       console.log('No data found for the query.');
+//       // Render the template with empty data alert
+//       return res.render('/account/dashboard');
+//     }
 
-    console.log('Query results:', results);
-    res.status(200).send('Query executed successfully.');
-  });
-});
+//     console.log('Query results:', results);
+//     res.status(200).send('Query executed successfully.');
+//   });
+// });
 // app.get('/dashboard', (req, res) => {
 
 //   res.redirect('/dashboard', { title: 'Dashboard' });
