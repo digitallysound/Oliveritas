@@ -49,15 +49,12 @@ var reviewRouter = require('./routes/review');
 
 var app = express();
 const cors = require('cors');
-// app.use(cors({
-//   origin: '*',
-//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//   allowedHeaders: ['Authorization', 'Content-Type'],
-//   credentials: true
-// }));
 const corsOptions = {
+  origin: ['http://localhost:3000', 'http://localhost:3000/register', 'http://localhost:3000y/account/dashboard'], // Replace with your allowed domains
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   credentials: true,
-  origin: ['http://localhost:3000', 'http://johnc740.sg-host.com:3306'] // Whitelist the domains you want to allow
+  maxAge: 86400,
 };
 app.use(cors(corsOptions));
 
@@ -196,7 +193,7 @@ module.exports = app;
 //   });
 // });
 
-app.post('/register', (req, res) => {
+app.post('/account/dashboard', (req, res) => {
     const { firstName, lastName, email, phone, password, passwordConfirm } = req.body;
     const sql = 'INSERT INTO entities (firstName, lastName, email, phone, password, passwordConfirm) VALUES (?, ?, ?, ?, ?, ?)';
     const parameters = [firstName, lastName, email, phone, password, passwordConfirm];
@@ -214,9 +211,28 @@ app.post('/register', (req, res) => {
     });
 });
 
-app.get('/register', (_, res) => {
-    console.log('GET /register route hit');
-    redirect('/account/dashboard');
+
+app.get('/login', function (_req, res) {
+  console.log('Executing query:');
+  // On request of this page initiating SQL query. Assumes that the object initialization is done above.
+  const selectQuery = 'SELECT * FROM Entities WHERE FirstName = "A"';
+  console.log('Executing query:', selectQuery);
+
+  db.query(selectQuery, function select(error, results, _fields) {
+    if (error) {
+      console.error('Database error:', error);
+      return res.status(500).send('Database error');
+    }
+
+    if (results.length === 0) {
+      console.log('No data found for the query.');
+      // Render the template with empty data alert
+      return res.render('/account/dashboard');
+    }
+
+    console.log('Query results:', results);
+    res.status(200).send('Query executed successfully.');
+  });
 });
 // app.get('/dashboard', (req, res) => {
 
