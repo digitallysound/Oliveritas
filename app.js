@@ -4,7 +4,7 @@ const createError = require('http-errors');
 const cors = require('cors'); // Import the cors middleware
 
 const passport = require('passport');
-const csrf = require('csurf'); 
+// const csrf = require('csurf'); 
 
 var session = require('express-session');
 var helmet = require('helmet'); 
@@ -55,6 +55,15 @@ var reviewRouter = require('./routes/review');
 // var googleRouter = require('./routes/auth/google');
 
 var app = express();
+const cors = require('cors');
+const corsOptions = {
+  origin: ['http://localhost:3000', 'http://localhost:3000/register', 'http://localhost:3000y/account/dashboard'], // Replace with your allowed domains
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  credentials: true,
+  maxAge: 86400,
+};
+app.use(cors(corsOptions));
 
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -173,25 +182,8 @@ const { profile } = require('console');
 app.use(logger('dev'));
 app.use(cookieParser());
 
-var db = new sqlite3.Database('./database.sqlite', (err) => {
-  if (err) {
-    console.error('Database connection error:', err.message);
-  } else {
-    console.log('Connected to the SQLite database.');
-  }
-});
 
-db.run(`CREATE TABLE IF NOT EXISTS users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  username TEXT UNIQUE,
-  password TEXT,
-  address TEXT,
-  order_details TEXT
-)`, (err) => {
-  if (err) {
-    console.error('Error creating users table:', err.message);
-  }
-});
+
 
 app.use(helmet());
 app.use(rateLimit({
@@ -207,3 +199,60 @@ app.use((req, res, next) => {
 });
 
 module.exports = app;
+
+// app.post('/login', (req, res) => {
+//   const { email, password } = req.body;
+//   const sql = 'INSERT INTO entities (email, password) VALUES (?, ?)';
+//   db.query(sql, email, password, (err) => {
+//     if (err) return res.status(500).json({ message: 'Database error' });
+//     res.status(200).json({ message: 'Thank you for contacting us!' });
+//   });
+// });
+
+app.post('/account/dashboard', (req, res) => {
+    const { firstName, lastName, email, phone, password, passwordConfirm } = req.body;
+    const sql = 'INSERT INTO entities (firstName, lastName, email, phone, password, passwordConfirm) VALUES (?, ?, ?, ?, ?, ?)';
+    const parameters = [firstName, lastName, email, phone, password, passwordConfirm];
+
+    db.query(sql, parameters, (err) => {
+        // Record the query execution
+        recordDatabaseQuery({
+            sql: sql,
+            parameters: parameters,
+            status: err ? 'error' : 'success'
+        });
+
+        if (err) return res.status(500).json({ message: 'Database error' });
+        res.status(200).json({ message: 'Thank you for contacting us!' });
+    });
+});
+
+
+app.get('/login', function (_req, res) {
+  console.log('Executing query:');
+  // On request of this page initiating SQL query. Assumes that the object initialization is done above.
+  const selectQuery = 'SELECT * FROM Entities WHERE FirstName = "A"';
+  console.log('Executing query:', selectQuery);
+
+  db.query(selectQuery, function select(error, results, _fields) {
+    if (error) {
+      console.error('Database error:', error);
+      return res.status(500).send('Database error');
+    }
+
+    if (results.length === 0) {
+      console.log('No data found for the query.');
+      // Render the template with empty data alert
+      return res.render('/account/dashboard');
+    }
+
+    console.log('Query results:', results);
+    res.status(200).send('Query executed successfully.');
+  });
+});
+// app.get('/dashboard', (req, res) => {
+
+//   res.redirect('/dashboard', { title: 'Dashboard' });
+// }
+// );
+
