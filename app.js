@@ -1,9 +1,10 @@
 const express = require('express');
 const path = require('path');
 const createError = require('http-errors');
+const db = require('./db/db.js');
 
 const passport = require('passport');
-const csrf = require('csurf'); 
+// const csrf = require('csurf'); 
 
 var session = require('express-session');
 var helmet = require('helmet'); 
@@ -47,6 +48,18 @@ var reviewRouter = require('./routes/review');
 // var googleRouter = require('./routes/auth/google');
 
 var app = express();
+const cors = require('cors');
+// app.use(cors({
+//   origin: '*',
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//   allowedHeaders: ['Authorization', 'Content-Type'],
+//   credentials: true
+// }));
+const corsOptions = {
+  credentials: true,
+  origin: ['http://localhost:3000', 'http://johnc740.sg-host.com:3306'] // Whitelist the domains you want to allow
+};
+app.use(cors(corsOptions));
 
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -80,13 +93,13 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Use CSRF protection middleware
-app.use(csrf());
+// app.use(csrf());
 
 // Make CSRF token available in views
-app.use(function(req, res, next) {
-  res.locals.csrfToken = req.csrfToken();
-  next();
-});
+// app.use(function(req, res, next) {
+//   res.locals.csrfToken = req.csrfToken();
+//   next();
+// });
 
 // Define routes
 app.use('/', indexRouter);
@@ -156,25 +169,8 @@ const { profile } = require('console');
 app.use(logger('dev'));
 app.use(cookieParser());
 
-var db = new sqlite3.Database('./database.sqlite', (err) => {
-  if (err) {
-    console.error('Database connection error:', err.message);
-  } else {
-    console.log('Connected to the SQLite database.');
-  }
-});
 
-db.run(`CREATE TABLE IF NOT EXISTS users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  username TEXT UNIQUE,
-  password TEXT,
-  address TEXT,
-  order_details TEXT
-)`, (err) => {
-  if (err) {
-    console.error('Error creating users table:', err.message);
-  }
-});
+
 
 app.use(helmet());
 app.use(rateLimit({
@@ -190,3 +186,41 @@ app.use((req, res, next) => {
 });
 
 module.exports = app;
+
+// app.post('/login', (req, res) => {
+//   const { email, password } = req.body;
+//   const sql = 'INSERT INTO entities (email, password) VALUES (?, ?)';
+//   db.query(sql, email, password, (err) => {
+//     if (err) return res.status(500).json({ message: 'Database error' });
+//     res.status(200).json({ message: 'Thank you for contacting us!' });
+//   });
+// });
+
+app.post('/register', (req, res) => {
+    const { firstName, lastName, email, phone, password, passwordConfirm } = req.body;
+    const sql = 'INSERT INTO entities (firstName, lastName, email, phone, password, passwordConfirm) VALUES (?, ?, ?, ?, ?, ?)';
+    const parameters = [firstName, lastName, email, phone, password, passwordConfirm];
+
+    db.query(sql, parameters, (err) => {
+        // Record the query execution
+        recordDatabaseQuery({
+            sql: sql,
+            parameters: parameters,
+            status: err ? 'error' : 'success'
+        });
+
+        if (err) return res.status(500).json({ message: 'Database error' });
+        res.status(200).json({ message: 'Thank you for contacting us!' });
+    });
+});
+
+app.get('/register', (_, res) => {
+    console.log('GET /register route hit');
+    redirect('/account/dashboard');
+});
+// app.get('/dashboard', (req, res) => {
+
+//   res.redirect('/dashboard', { title: 'Dashboard' });
+// }
+// );
+
