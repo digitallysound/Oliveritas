@@ -8,12 +8,27 @@ const connection = mysql.createConnection({
   database: 'dbgifl5cl6f4og'   // Replace with your MySQL database name
 });
  
+const pingDatabase = () => {
+  connection.query('SELECT 1', (err, results) => {
+    if (err) {
+      console.error('Error pinging database:', err);
+    } else {
+      console.log('Database ping successful');
+    }
+  });
+};
+
+
 // Connect to database
 connection.connect(err => {
   if (err) {
     console.error('MySQL connection error:', err);
     return;
   }
+  
+  // Set up interval for the keepAlive
+  setInterval(pingDatabase, 60000);
+
   console.log('Connected to MySQL database');
 });
  

@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const createError = require('http-errors');
-const cors = require('cors'); // Import the cors middleware
+//onst cors = require('cors'); // Import the cors middleware
 
 const passport = require('passport');
 // const csrf = require('csurf'); 
@@ -65,14 +65,13 @@ var app = express();
 // };
 // app.use(cors(corsOptions));
 
-const cors = require('cors');
-app.use(cors());
+
 
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Enable CORS for all routes
-app.use(cors());
+//app.use(cors());
 
 // Disable caching for all responses REVIEW
 app.use((req, res, next) => {
@@ -178,6 +177,7 @@ var logger = require('morgan');
 var sqlite3 = require('sqlite3').verbose();
 require('dotenv/config');
 
+
 var hpp = require('hpp');
 const { profile } = require('console');
 // require('./config/passport')(passport);
@@ -200,7 +200,8 @@ app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
   next();
 });
-
+const cors = require('cors');
+app.use(cors());
 module.exports = app;
 
 // app.post('/login', (req, res) => {
@@ -258,4 +259,3 @@ module.exports = app;
 //   res.redirect('/dashboard', { title: 'Dashboard' });
 // }
 // );
-
